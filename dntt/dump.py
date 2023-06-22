@@ -9,7 +9,7 @@ with open('config.yaml', 'r') as f:
     for switch in config['switches']:
         child = pexpect.spawn(
             f'ssh -oHostKeyAlgorithms=+ssh-rsa,ssh-dss -o KexAlgorithms=+diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1 {switch["username"]}@{switch["host"]}', encoding='utf-8')
-        child.logfile = sys.stdout
+        #child.logfile = sys.stdout
         if switch['vendor'] == 'huawei':
             child.expect('Password:')
             child.sendline(switch["password"])
