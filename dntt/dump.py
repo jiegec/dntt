@@ -8,7 +8,9 @@ with open('config.yaml', 'r') as f:
         with Telnet(switch['host']) as tn:
             tn.set_debuglevel(100)
             if switch['vendor'] == 'huawei':
+                tn.read_until(f'Username:'.encode('utf-8'))
                 tn.write(f'{switch["username"]}\n'.encode('utf-8'))
+                tn.read_until(f'Password:'.encode('utf-8'))
                 tn.write(f'{switch["password"]}\n'.encode('utf-8'))
                 tn.write(f'screen-length 0 temporary\n'.encode('utf-8'))
                 tn.write(f'display current-configuration\n'.encode('utf-8'))
@@ -41,6 +43,7 @@ with open('config.yaml', 'r') as f:
                 output = tn.read_until('# exit'.encode('utf-8')).decode('utf-8')
                 # strip additional content
                 output = output[output.find('show run'):]
+                output = re.sub('## Generated at .*', '', output)
                 output = "\n".join(output.split("\n")[1:-1])
             elif switch['vendor'] == 'cisco':
                 tn.read_until(f'login:'.encode('utf-8'))
@@ -53,6 +56,7 @@ with open('config.yaml', 'r') as f:
                 output = tn.read_until('# exit'.encode('utf-8')).decode('utf-8')
                 # strip additional content
                 output = output[output.find('show run'):]
+                output = re.sub('!Time: .*', '', output)
                 output = "\n".join(output.split("\n")[1:-1])
             else:
                 continue
