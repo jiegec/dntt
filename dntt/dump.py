@@ -51,17 +51,23 @@ with open('config.yaml', 'r') as f:
             output = re.sub('## Generated at .*', '', output)
             output = "\n".join(output.split("\n")[1:-1])
         elif switch['vendor'] == 'cisco':
-            child.expect('Password:')
+            child.expect('(P|p)assword:')
             child.sendline(switch["password"])
-            child.expect('#')
+            state = child.expect(['>', '#'])
+            if state == 0:
+                # need enable
+                child.sendline('en')
+                child.sendline(switch["password"])
             child.sendline('terminal length 0')
             child.sendline('show run')
-            child.sendline('exit')
-            child.expect('# exit')
+            child.sendline('show version')
+            child.expect('# ?show version')
             output = child.before
             # strip additional content
-            output = output[output.find('!Command: show running-config'):]
+            output = output[output.find('show run'):]
             output = re.sub('!Time: .*', '', output)
+            output = re.sub('Last configuration change at .*', '', output)
+            output = re.sub('NVRAM config last updated at .*', '', output)
             output = "\n".join(output.split("\n")[1:-1])
         else:
             continue
