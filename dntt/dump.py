@@ -42,6 +42,18 @@ with open('config.yaml', 'r') as f:
                 # strip additional content
                 output = output[output.find('show run'):]
                 output = "\n".join(output.split("\n")[1:-1])
+            elif switch['vendor'] == 'cisco':
+                tn.read_until(f'login:'.encode('utf-8'))
+                tn.write(f'{switch["username"]}\n'.encode('utf-8'))
+                tn.read_until(f'Password:'.encode('utf-8'))
+                tn.write(f'{switch["password"]}\n'.encode('utf-8'))
+                tn.write(f'terminal length 0\n'.encode('utf-8'))
+                tn.write(f'show run\n'.encode('utf-8'))
+                tn.write(f'exit\n'.encode('utf-8'))
+                output = tn.read_until('# exit'.encode('utf-8')).decode('utf-8')
+                # strip additional content
+                output = output[output.find('show run'):]
+                output = "\n".join(output.split("\n")[1:-1])
             else:
                 continue
 
