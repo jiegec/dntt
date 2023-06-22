@@ -1,8 +1,6 @@
 import yaml
 import re
-from pexpect import pxssh
 import pexpect
-import sys
 
 with open('config.yaml', 'r') as f:
     config = yaml.load(f, Loader=yaml.Loader)
