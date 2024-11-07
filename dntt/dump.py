@@ -67,6 +67,18 @@ with open('config.yaml', 'r') as f:
             output = re.sub('Last configuration change at .*', '', output)
             output = re.sub('NVRAM config last updated at .*', '', output)
             output = "\n".join(output.split("\n")[1:-1])
+        elif switch['vendor'] == 'h3c':
+            child.expect('.* password:')
+            child.sendline(switch["password"])
+            child.expect('>')
+            child.sendline('screen-length disable')
+            child.sendline('display current-configuration')
+            child.sendline('quit')
+            child.expect('quit')
+            output = child.before
+            # strip additional content
+            output = output[output.find('display current-configuration'):]
+            output = "\n".join(output.split("\n")[1:-1])
         else:
             continue
         child.close()
