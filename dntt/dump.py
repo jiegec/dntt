@@ -64,8 +64,28 @@ with open('config.yaml', 'r') as f:
             # strip additional content
             output = output[output.find('show run'):]
             output = re.sub('!Time: .*', '', output)
+            output = re.sub('Running configuration last done at: .*', '', output)
             output = re.sub('Last configuration change at .*', '', output)
             output = re.sub('NVRAM config last updated at .*', '', output)
+            output = "\n".join(output.split("\n")[1:-1])
+        elif switch['vendor'] == 'cisco-legacy':
+            child.expect('User Name:')
+            child.sendline(switch["username"])
+            child.expect('Password:')
+            child.sendline(switch["password"])
+
+            state = child.expect(['>', '#'])
+            if state == 0:
+                # need enable
+                child.sendline('en')
+                child.sendline(switch["password"])
+            child.sendline('terminal datadump')
+            child.expect('#')
+            child.sendline('show run')
+            child.expect('#')
+            output = child.before
+            # strip additional content
+            output = output[output.find('show run'):]
             output = "\n".join(output.split("\n")[1:-1])
         elif switch['vendor'] == 'h3c':
             child.expect('.* password:')
